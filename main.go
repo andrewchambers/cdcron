@@ -98,6 +98,11 @@ func printScheduleAndExit(jobs []*Job) {
 }
 
 func main() {
+	// Our metrics don't change very often.
+	cdmetrics.MetricInterval = 30 * time.Second
+	cdmetrics.MetricPlugin = "cdcron"
+	cdmetrics.MetricPluginInstance = ""
+
 	flag.Parse()
 
 	tabData, err := ioutil.ReadFile(*tab)
@@ -126,7 +131,6 @@ func main() {
 		runningGauge[j.Name] = cdmetrics.NewGauge(j.Name + "-is-running")
 	}
 
-	cdmetrics.ExportGoRuntimeMetrics()
 	cdmetrics.Start()
 
 	done := make(chan struct{}, 1)

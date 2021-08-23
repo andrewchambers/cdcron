@@ -4,3 +4,5 @@ github.com/andrewchambers/go-cdmetrics v0.0.0-20210823103409-5f64b0f00e65 h1:YKa
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210823103409-5f64b0f00e65/go.mod h1:q1D3lxJVmB2AkKL7wAI2mJrEVYH6Mxmndb+Ly7c7+XI=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210823122309-23f51259f611 h1:nTvWDZfEJM9qfvbl5FUgEtx6QiW7LhKBvLvPhgGDA7o=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210823122309-23f51259f611/go.mod h1:q1D3lxJVmB2AkKL7wAI2mJrEVYH6Mxmndb+Ly7c7+XI=
+github.com/andrewchambers/go-cdmetrics v0.0.0-20210823125129-e0d38c891513 h1:3JVzx/Kn/txcvlx/moDSFhGCa8MjVW39CxPZRMa2m5U=
+github.com/andrewchambers/go-cdmetrics v0.0.0-20210823125129-e0d38c891513/go.mod h1:q1D3lxJVmB2AkKL7wAI2mJrEVYH6Mxmndb+Ly7c7+XI=

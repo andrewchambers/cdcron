@@ -1,6 +1,6 @@
 # cdcron
 
-`cdcron` is cron service which can also export prometheus metrics.
+`cdcron` is cron service which can also export collectd metrics.
 
 Because `cdcron` uses a simple and robust time keeping algorithm,
 it is not suited for thousands of jobs,
@@ -53,12 +53,12 @@ job2 1/2 * * * * sleep 300
 
 produces the following exported metrics:
 ```
-black.go-cdcron.gauge-job1-duration 0.010488727 1629722407
-black.go-cdcron.counter-job1-success 1 1629722407
-black.go-cdcron.gauge-job1-utime 0.003877 1629722407
-black.go-cdcron.counter-job2-failure 0 1629722407
-black.go-cdcron.counter-job2-success 0 1629722407
-black.go-cdcron.gauge-job2-duration 0 1629722407
-black.go-cdcron.gauge-job2-maxrss-bytes 0 1629722407
+host.cdcron.gauge-job1-duration 0.010488727 1629722407
+host.cdcron.counter-job1-success 1 1629722407
+host.cdcron.gauge-job1-utime 0.003877 1629722407
+host.cdcron.counter-job2-failure 0 1629722407
+host.cdcron.counter-job2-success 0 1629722407
+host.cdcron.gauge-job2-duration 0 1629722407
+host.cdcron.gauge-job2-maxrss-bytes 0 1629722407
 ...
 ```

@@ -1,94 +1,39 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
+	"flag"
 	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/andrewchambers/go-cdmetrics"
+	_ "github.com/andrewchambers/go-cdmetrics/flag"
 )
 
 // flags
 var (
 	printSchedule    = flag.Bool("print-schedule", false, "Print the schedule for the next 24 hours then exit.")
 	printScheduleFor = flag.Duration("print-schedule-for", 0*time.Second, "Print the schedule for the specified duration then exit.")
-	metricsAddress   = flag.String("prometheus-metrics", "", "address:port to serve job prometheus metrics on.")
-	tab              = flag.String("f", "/etc/promcron", "'promcron' file to load and run.")
+	tab              = flag.String("cron-tab", "/etc/cdcron", "'cdcron' file to load and run.")
 )
 
 // metrics
 var (
-	forwardTimeSkips = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "promcron_forward_time_skips",
-		Help: "Detected time anomalies where time moved forward causing potential job skips.",
-	})
-	backwardTimeSkips = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "promcron_backward_time_skips",
-		Help: "Detected anomalies where time moved backward causing potential job duplicates.",
-	})
-	overdueCounter = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "promcron_job_overdue_count",
-			Help: "Times a job did not finish before the next rescheduling.",
-		},
-		[]string{"job"},
-	)
-	failureCounter = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "promcron_job_failure_count",
-			Help: "Times a job has failed.",
-		},
-		[]string{"job"},
-	)
-	successCounter = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "promcron_job_success_count",
-			Help: "Times a job has succeeded.",
-		},
-		[]string{"job"},
-	)
-	durationGauge = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "promcron_job_duration_seconds",
-			Help: "Time taken for the last job execution.",
-		},
-		[]string{"job"},
-	)
-	maxrssBytesGauge = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "promcron_job_maxrss_bytes",
-			Help: "Max rss of the last job execution.",
-		},
-		[]string{"job"},
-	)
-	utimeGauge = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "promcron_job_utime_seconds",
-			Help: "User cpu time used for the last job execution.",
-		},
-		[]string{"job"},
-	)
-	stimeGauge = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "promcron_job_stime_seconds",
-			Help: "System cpu time used for the last job execution.",
-		},
-		[]string{"job"},
-	)
-	runningGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "promcron_job_running",
-		Help: "Whether or not the job is currently running.",
-	},
-		[]string{"job"})
+	forwardTimeSkips  = cdmetrics.NewCounter("forward-time-skips")
+	backwardTimeSkips = cdmetrics.NewCounter("backward-time-skips")
+	overdueCounter    = make(map[string]*cdmetrics.Counter)
+	failureCounter    = make(map[string]*cdmetrics.Counter)
+	successCounter    = make(map[string]*cdmetrics.Counter)
+	durationGauge     = make(map[string]*cdmetrics.Gauge)
+	maxrssBytesGauge  = make(map[string]*cdmetrics.Gauge)
+	utimeGauge        = make(map[string]*cdmetrics.Gauge)
+	stimeGauge        = make(map[string]*cdmetrics.Gauge)
+	runningGauge      = make(map[string]*cdmetrics.Gauge)
 )
 
 func delayTillNextCheck(fromt time.Time) time.Duration {
@@ -114,21 +59,21 @@ func onJobExit(jobName string, duration time.Duration, cmd *exec.Cmd, err error)
 
 	log.Printf("job %s finished in %s with exit status %d", jobName, duration, exitStatus)
 
-	runningGauge.WithLabelValues(jobName).Set(0)
+	runningGauge[jobName].Set(0)
 
 	if exitStatus == 0 {
-		successCounter.WithLabelValues(jobName).Inc()
+		successCounter[jobName].Inc()
 	} else {
-		failureCounter.WithLabelValues(jobName).Inc()
+		failureCounter[jobName].Inc()
 	}
 
-	durationGauge.WithLabelValues(jobName).Set(duration.Seconds())
+	durationGauge[jobName].Set(duration.Seconds())
 
 	if rusage, ok := cmd.ProcessState.SysUsage().(*syscall.Rusage); ok {
-		durationGauge.WithLabelValues(jobName).Set(duration.Seconds())
-		maxrssBytesGauge.WithLabelValues(jobName).Set(float64(rusage.Maxrss * 1024))
-		utimeGauge.WithLabelValues(jobName).Set(float64(rusage.Utime.Sec) + (float64(rusage.Utime.Usec) / 1000000.0))
-		stimeGauge.WithLabelValues(jobName).Set(float64(rusage.Stime.Sec) + (float64(rusage.Stime.Usec) / 1000000.0))
+		durationGauge[jobName].Set(duration.Seconds())
+		maxrssBytesGauge[jobName].Set(float64(rusage.Maxrss * 1024))
+		utimeGauge[jobName].Set(float64(rusage.Utime.Sec) + (float64(rusage.Utime.Usec) / 1000000.0))
+		stimeGauge[jobName].Set(float64(rusage.Stime.Sec) + (float64(rusage.Stime.Usec) / 1000000.0))
 	}
 
 }
@@ -171,26 +116,18 @@ func main() {
 
 	// Init prometheus vectors with job names.
 	for _, j := range jobs {
-		overdueCounter.WithLabelValues(j.Name)
-		failureCounter.WithLabelValues(j.Name)
-		successCounter.WithLabelValues(j.Name)
-		durationGauge.WithLabelValues(j.Name)
-		maxrssBytesGauge.WithLabelValues(j.Name)
-		utimeGauge.WithLabelValues(j.Name)
-		stimeGauge.WithLabelValues(j.Name)
-		runningGauge.WithLabelValues(j.Name)
+		overdueCounter[j.Name] = cdmetrics.NewCounter(j.Name + "-overdue")
+		failureCounter[j.Name] = cdmetrics.NewCounter(j.Name + "-failure")
+		successCounter[j.Name] = cdmetrics.NewCounter(j.Name + "-success")
+		durationGauge[j.Name] = cdmetrics.NewGauge(j.Name + "-duration")
+		maxrssBytesGauge[j.Name] = cdmetrics.NewGauge(j.Name + "-maxrss-bytes")
+		utimeGauge[j.Name] = cdmetrics.NewGauge(j.Name + "-utime")
+		stimeGauge[j.Name] = cdmetrics.NewGauge(j.Name + "-stime")
+		runningGauge[j.Name] = cdmetrics.NewGauge(j.Name + "-is-running")
 	}
 
-	if *metricsAddress != "" {
-		go func() {
-			http.Handle("/metrics", promhttp.Handler())
-			log.Printf("serving prometheus metrics at http://%s/metrics", *metricsAddress)
-			err := http.ListenAndServe(*metricsAddress, nil)
-			if err != nil {
-				log.Fatalf("error running metrics server: %s", err)
-			}
-		}()
-	}
+	cdmetrics.ExportGoRuntimeMetrics()
+	cdmetrics.Start()
 
 	done := make(chan struct{}, 1)
 
@@ -239,11 +176,11 @@ scheduler:
 			}
 			if j.IsRunning() {
 				log.Printf("job %s is overdue", j.Name)
-				overdueCounter.WithLabelValues(j.Name).Inc()
+				overdueCounter[j.Name].Inc()
 				continue
 			}
 			log.Printf("starting job %s", j.Name)
-			runningGauge.WithLabelValues(j.Name).Set(1)
+			runningGauge[j.Name].Set(1)
 			j.Start(onJobExit)
 		}
 

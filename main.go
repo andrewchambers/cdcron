@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"flag"
 	"os/exec"
 	"os/signal"
 	"syscall"

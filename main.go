@@ -119,7 +119,7 @@ func main() {
 		printScheduleAndExit(jobs)
 	}
 
-	// Init prometheus vectors with job names.
+	// Init metrics with job names.
 	for _, j := range jobs {
 		overdueCounter[j.Name] = cdmetrics.NewCounter(j.Name + "-overdue")
 		failureCounter[j.Name] = cdmetrics.NewCounter(j.Name + "-failure")

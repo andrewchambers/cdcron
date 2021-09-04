@@ -2,6 +2,8 @@ github.com/andrewchambers/go-cdclient v0.0.0-20210823101709-55464b2eacac h1:j55p
 github.com/andrewchambers/go-cdclient v0.0.0-20210823101709-55464b2eacac/go.mod h1:RvSStBWFUoyen3MHFBBEDtST9MgwOy3zg1xK44SS0Pk=
 github.com/andrewchambers/go-cdclient v0.0.0-20210902052642-1dda26cc5ad6 h1:1dJTgdAY01FKTJOLHrJC0kPlRw4ULHXLEd+RjpCSkc8=
 github.com/andrewchambers/go-cdclient v0.0.0-20210902052642-1dda26cc5ad6/go.mod h1:RvSStBWFUoyen3MHFBBEDtST9MgwOy3zg1xK44SS0Pk=
+github.com/andrewchambers/go-cdclient v0.0.0-20210904030926-1c2500bc986f h1:hLLaBL4iF28MApWrU/NU0tSxBKxSUaFOvRmMZ95LSfg=
+github.com/andrewchambers/go-cdclient v0.0.0-20210904030926-1c2500bc986f/go.mod h1:RvSStBWFUoyen3MHFBBEDtST9MgwOy3zg1xK44SS0Pk=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210823103409-5f64b0f00e65 h1:YKavQ7NEUjzMyz++Q8PwF6MB8URyYPpcks2+evLu4f0=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210823103409-5f64b0f00e65/go.mod h1:q1D3lxJVmB2AkKL7wAI2mJrEVYH6Mxmndb+Ly7c7+XI=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210823122309-23f51259f611 h1:nTvWDZfEJM9qfvbl5FUgEtx6QiW7LhKBvLvPhgGDA7o=
@@ -14,3 +16,5 @@ github.com/andrewchambers/go-cdmetrics v0.0.0-20210902083106-b3f16ccf37e6 h1:f0W
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210902083106-b3f16ccf37e6/go.mod h1:HH0q8834292/iwwbXc62lTHjXCiXJDnDn69gvi8WR+k=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210902083359-48acc0bb323c h1:hu5XcPd1XD7sowKW+Fn6n4TkpI3V18DFjdLRc9dnPu4=
 github.com/andrewchambers/go-cdmetrics v0.0.0-20210902083359-48acc0bb323c/go.mod h1:HH0q8834292/iwwbXc62lTHjXCiXJDnDn69gvi8WR+k=
+github.com/andrewchambers/go-cdmetrics v0.0.0-20210904031225-ab2dee92ccb3 h1:qeIdhul6aoOcjkjuc0SYNPw3jGthQc+R2Q3vCN9kmAE=
+github.com/andrewchambers/go-cdmetrics v0.0.0-20210904031225-ab2dee92ccb3/go.mod h1:BpPnNvTQp8CEbs3EKospmkUl4xFRKCxC0Iy6OWrKubI=

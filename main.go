@@ -99,9 +99,9 @@ func printScheduleAndExit(jobs []*Job) {
 
 func main() {
 	// Our metrics don't change very often.
-	cdmetrics.MetricInterval = 30 * time.Second
-	cdmetrics.MetricPlugin = "cdcron"
-	cdmetrics.MetricPluginInstance = ""
+	cdmetrics.MetricsInterval = 30 * time.Second
+	cdmetrics.MetricsPlugin = "cdcron"
+	cdmetrics.MetricsPluginInstance = ""
 
 	flag.Parse()
 

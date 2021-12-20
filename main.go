@@ -170,6 +170,7 @@ scheduler:
 
 		select {
 		case <-time.After(delay):
+			now = time.Now()
 		case <-done:
 			break scheduler
 		}
